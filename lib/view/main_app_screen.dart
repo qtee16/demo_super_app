@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_draggable_gridview/flutter_draggable_gridview.dart';
 import 'package:launcher_app/routes/app_routes.dart';
 
 import '../models/app_item.dart';
@@ -84,17 +87,63 @@ class PageScreen extends StatefulWidget {
 }
 
 class _PageScreenState extends State<PageScreen> {
+  List<DraggableGridItem> _listOfDraggableGridItem = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _listOfDraggableGridItem = widget.items.map((item) {
+      return DraggableGridItem(child: GridItem(item: item), isDraggable: true);
+    }).toList();
+  }
+
+  Widget feedback(List<DraggableGridItem> list, int index) {
+    return Container(
+      color: Colors.transparent,
+      child: list[index].child,
+    );
+  }
+
+  PlaceHolderWidget placeHolder(List<DraggableGridItem> list, int index) {
+    return PlaceHolderWidget(
+      child: Container(
+        color: Colors.transparent,
+      ),
+    );
+  }
+
+  void onDragAccept(
+      List<DraggableGridItem> list, int beforeIndex, int afterIndex) {
+    log('onDragAccept: $beforeIndex -> $afterIndex');
+  }
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        childAspectRatio: 1.0,
+    return Scaffold(
+      body: DraggableGridViewBuilder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+          childAspectRatio: 1.0,
+        ),
+        children: _listOfDraggableGridItem,
+        dragCompletion: onDragAccept,
+        isOnlyLongPress: true,
+        dragFeedback: feedback,
+        dragPlaceHolder: placeHolder,
       ),
-      itemCount: widget.items.length,
-      itemBuilder: (context, index) {
-        final item = widget.items[index];
-        return Center(
+    );
+  }
+}
+
+class GridItem extends StatelessWidget {
+  const GridItem({super.key, required this.item});
+  final AppItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      child: Container(
+        color: Colors.red,
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -127,8 +176,8 @@ class _PageScreenState extends State<PageScreen> {
               ),
             ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
