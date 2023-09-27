@@ -98,7 +98,10 @@ class _PageScreenState extends State<PageScreen> {
   }
 
   Widget feedback(List<DraggableGridItem> list, int index) {
+    final maxWidth = MediaQuery.of(context).size.width;
     return Container(
+      height: maxWidth/4,
+      width: maxWidth/4,
       color: Colors.transparent,
       child: list[index].child,
     );
@@ -141,8 +144,9 @@ class GridItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
+      color: Colors.transparent,
       child: Container(
-        color: Colors.red,
+        color: Colors.transparent,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
