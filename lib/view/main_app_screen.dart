@@ -34,7 +34,7 @@ class _MainAppState extends State<MainApp> {
       AppItem(imageUrl: "assets/images/locket.webp", title: "Locket",),
     ];
     list3 = [
-      AppItem(imageUrl: "assets/images/titktok.webp", title: "Tiktok",),
+      AppItem(imageUrl: "assets/images/tiktok.webp", title: "Tiktok",),
     ];
     
   }
