@@ -1,8 +1,6 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_draggable_gridview/flutter_draggable_gridview.dart';
 import 'package:launcher_app/routes/app_routes.dart';
+import 'package:reorderables/reorderables.dart';
 
 import '../models/app_item.dart';
 
@@ -15,27 +13,30 @@ class MainApp extends StatefulWidget {
 
 class _MainAppState extends State<MainApp> {
   int _currentPage = 0;
-  late List<Widget> _pages;
+  late List<AppItem> list1;
+  late List<AppItem> list2;
+  late List<AppItem> list3;
 
   @override
   void initState() {
     super.initState();
-    List<AppItem> list1 = [
+    list1 = [
       AppItem(imageUrl: "assets/images/facebook.jpg", title: "Facebook",),
       AppItem(imageUrl: "assets/images/instagram.webp", title: "Instagram",),
+      AppItem(imageUrl: "assets/images/locket.webp", title: "Locket",),
+      AppItem(imageUrl: "assets/images/tiktok.webp", title: "Tiktok",),
+      AppItem(imageUrl: "assets/images/facebook.jpg", title: "Facebook",),
+      AppItem(imageUrl: "assets/images/instagram.webp", title: "Instagram",),
+      AppItem(imageUrl: "assets/images/locket.webp", title: "Locket",),
+      AppItem(imageUrl: "assets/images/tiktok.webp", title: "Tiktok",),
     ];
-    List<AppItem> list2 = [
+    list2 = [
       AppItem(imageUrl: "assets/images/locket.webp", title: "Locket",),
     ];
-    List<AppItem> list3 = [
+    list3 = [
       AppItem(imageUrl: "assets/images/titktok.webp", title: "Tiktok",),
     ];
-    _pages = [
-      PageScreen(items: list1),
-      PageScreen(items: list2),
-      PageScreen(items: list3),
-      // Thêm các trang khác ở đây
-    ];
+    
   }
 
   Widget _buildDot(int index) {
@@ -52,11 +53,16 @@ class _MainAppState extends State<MainApp> {
 
   @override
   Widget build(BuildContext context) {
+    final maxWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       body: Stack(
         children: <Widget>[
           PageView(
-            children: _pages,
+            children: [
+              PageScreen(items: list1, maxWidth: maxWidth,),
+              PageScreen(items: list2, maxWidth: maxWidth,),
+              PageScreen(items: list3, maxWidth: maxWidth,),
+            ],
             onPageChanged: (int index) {
               setState(() {
                 _currentPage = index;
@@ -69,7 +75,7 @@ class _MainAppState extends State<MainApp> {
             right: 0.0,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(_pages.length, _buildDot),
+              children: List.generate(3, _buildDot),
             ),
           ),
         ],
@@ -79,74 +85,100 @@ class _MainAppState extends State<MainApp> {
 }
 
 class PageScreen extends StatefulWidget {
-  const PageScreen({super.key, required this.items});
+  const PageScreen({super.key, required this.items, required this.maxWidth});
   final List<AppItem> items;
+  final double maxWidth;
 
   @override
   State<PageScreen> createState() => _PageScreenState();
 }
 
 class _PageScreenState extends State<PageScreen> {
-  List<DraggableGridItem> _listOfDraggableGridItem = [];
+  List<Widget> _tiles = [];
 
   @override
   void initState() {
     super.initState();
-    _listOfDraggableGridItem = widget.items.map((item) {
-      return DraggableGridItem(child: GridItem(item: item), isDraggable: true);
+    _tiles = widget.items.map((item) {
+      return GridItem(item: item);
     }).toList();
+    // final size = MediaQuery.of(context).size;
+    final space = (widget.maxWidth - 68 * 4 - 60)/3;
+    _tiles.add(GridItem(item: AppItem(imageUrl: "assets/images/facebook.jpg", title: "Facebook",), size: 128 + space,));
+    _tiles.add(GridItem(item: AppItem(imageUrl: "assets/images/tiktok.webp", title: "Tiktok",), size: 128 + space,));
   }
 
-  Widget feedback(List<DraggableGridItem> list, int index) {
-    final maxWidth = MediaQuery.of(context).size.width;
-    return Container(
-      height: maxWidth/4,
-      width: maxWidth/4,
-      color: Colors.transparent,
-      child: list[index].child,
-    );
-  }
+  // Widget feedback(List<DraggableGridItem> list, int index) {
+  //   final maxWidth = MediaQuery.of(context).size.width;
+  //   return Container(
+  //     height: maxWidth/4,
+  //     width: maxWidth/4,
+  //     color: Colors.transparent,
+  //     child: list[index].child,
+  //   );
+  // }
 
-  PlaceHolderWidget placeHolder(List<DraggableGridItem> list, int index) {
-    return PlaceHolderWidget(
-      child: Container(
-        color: Colors.transparent,
-      ),
-    );
-  }
+  // PlaceHolderWidget placeHolder(List<DraggableGridItem> list, int index) {
+  //   return PlaceHolderWidget(
+  //     child: Container(
+  //       color: Colors.transparent,
+  //     ),
+  //   );
+  // }
 
-  void onDragAccept(
-      List<DraggableGridItem> list, int beforeIndex, int afterIndex) {
-    log('onDragAccept: $beforeIndex -> $afterIndex');
-  }
+  // void onDragAccept(
+  //     List<DraggableGridItem> list, int beforeIndex, int afterIndex) {
+  //   log('onDragAccept: $beforeIndex -> $afterIndex');
+  // }
+
+  void _onReorder(int oldIndex, int newIndex) {
+      setState(() {
+        _tiles.insert(newIndex, _tiles.removeAt(oldIndex));
+      });
+    }
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final space = (size.width - 68 * 4 - 60)/3;
+
+
     return Scaffold(
-      body: DraggableGridViewBuilder(
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          childAspectRatio: 1.0,
+      body: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 60),
+        width: size.width,
+        height: size.height,
+        child: ReorderableWrap(
+          spacing: space,
+          runSpacing: space - 14,
+          onReorder: _onReorder,
+          onNoReorder: (int index) {
+            //this callback is optional
+            debugPrint('${DateTime.now().toString().substring(5, 22)} reorder cancelled. index:$index');
+          },
+          buildDraggableFeedback: (context, constraints, child) {
+            return Container(
+              color: Colors.transparent,
+              child: child,
+            );
+          },
+          children: _tiles,
         ),
-        children: _listOfDraggableGridItem,
-        dragCompletion: onDragAccept,
-        isOnlyLongPress: true,
-        dragFeedback: feedback,
-        dragPlaceHolder: placeHolder,
       ),
     );
   }
 }
 
 class GridItem extends StatelessWidget {
-  const GridItem({super.key, required this.item});
+  const GridItem({super.key, required this.item, this.size = 60});
   final AppItem item;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
       child: Container(
-        color: Colors.transparent,
+        width: size + 8,
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -162,20 +194,21 @@ class GridItem extends StatelessWidget {
                   );
                 },
                 child: Container(
-                  width: 48,
-                  height: 48,
+                  width: size,
+                  height: size,
                   decoration: BoxDecoration(
                     image: DecorationImage(image: AssetImage(item.imageUrl)),
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
               ),
-              const SizedBox(height: 4,),
+              const SizedBox(height: 8,),
               Text(
                 item.title,
                 style: const TextStyle(
                   fontSize: 14,
                   color: Colors.black,
+                  height: 1,
                 ),
               ),
             ],
